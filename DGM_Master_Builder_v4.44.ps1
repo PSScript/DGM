@@ -915,20 +915,36 @@ $nachzuegler = @($masterUsers | Where-Object {
 })
 
 if ($nachzuegler.Count -gt 0) {
-    Write-Host "  Nachzügler (W1-9/Pilot, ready for batch): $($nachzuegler.Count)"
+    Write-Host "  Nachzügler Users (W1-9/Pilot, ready for batch): $($nachzuegler.Count)"
     
     # Full detail export
     $nzFile = Join-Path $OutDir_Master "Nachzuegler_W1-9_Ready.csv"
-    $nachzuegler | Select-Object $provisionCols | 
-        Export-Csv -Delimiter $Delimiter -Encoding UTF8 -NoTypeInformation -Path $nzFile
+    $nachzuegler | Export-Csv -Delimiter $Delimiter -Encoding UTF8 -NoTypeInformation -Path $nzFile
     Strip-Quotes $nzFile
     
-    # Quick2 Format (Email-Only for Batch Import)
+    # Quick2 Format
     $qFile = Join-Path $OutDir_Master "Nachzuegler_Quick2_Batch.csv"
     $nachzuegler | Select-Object @{N='EmailAddress';E={$_.email}} | 
         Export-Csv -Delimiter ',' -Encoding UTF8 -NoTypeInformation -Path $qFile
     Strip-Quotes $qFile
     Write-Host "    └─ Quick2 CSV generated (email-only batch format)"
+    
+    # IMAP Format (emailaddress,username,password)
+    $imapFile = Join-Path $OutDir_Master "Nachzuegler_IMAP.csv"
+    $nachzuegler | Select-Object @{N='emailaddress';E={$_.email}},
+                                  @{N='username';E={$_.email}},
+                                  @{N='password';E={$_.Password}} |
+        Export-Csv -Delimiter ',' -Encoding UTF8 -NoTypeInformation -Path $imapFile
+    Strip-Quotes $imapFile
+    Write-Host "    └─ IMAP CSV generated (emailaddress,username,password)"
+    
+    # CANCOM Format (email;password) - CSV with semicolon
+    $cancomFile = Join-Path $OutDir_Master "Nachzuegler_CANCOM.csv"
+    $nachzuegler | Select-Object @{N='email';E={$_.email}},
+                                  @{N='password';E={$_.Password}} |
+        Export-Csv -Delimiter ';' -Encoding UTF8 -NoTypeInformation -Path $cancomFile
+    Strip-Quotes $cancomFile
+    Write-Host "    └─ CANCOM CSV generated (email;password for Kopano reset)"
 }
 
 # === NACHZÜGLER SHARED MAILBOXES ===
@@ -939,7 +955,6 @@ $nachzueglerShared = @($masterSharedMailboxes | Where-Object {
     $isPastWave -and 
     ($_.ProvisioningStatus -match 'NACHZUEGLER')
 })
-
 if ($nachzueglerShared.Count -gt 0) {
     Write-Host "  Nachzügler Shared Mailboxes (W1-9/Pilot, ready for batch): $($nachzueglerShared.Count)"
     
@@ -954,6 +969,23 @@ if ($nachzueglerShared.Count -gt 0) {
         Export-Csv -Delimiter ',' -Encoding UTF8 -NoTypeInformation -Path $qsFile
     Strip-Quotes $qsFile
     Write-Host "    └─ Quick2 CSV generated (email-only batch format)"
+    
+    # IMAP Format (emailaddress,username,password)
+    $imapFile = Join-Path $OutDir_Master "Nachzuegler_SharedMailboxes_IMAP.csv"
+    $nachzueglerShared | Select-Object @{N='emailaddress';E={$_.funktionspostfach}},
+                                        @{N='username';E={$_.funktionspostfach}},
+                                        @{N='password';E={$SharedMailboxPassword}} |
+        Export-Csv -Delimiter ',' -Encoding UTF8 -NoTypeInformation -Path $imapFile
+    Strip-Quotes $imapFile
+    Write-Host "    └─ IMAP CSV generated (emailaddress,username,password)"
+    
+    # CANCOM Format (email;password) - CSV with semicolon
+    $cancomFile = Join-Path $OutDir_Master "Nachzuegler_SharedMailboxes_CANCOM.csv"
+    $nachzueglerShared | Select-Object @{N='email';E={$_.funktionspostfach}},
+                                        @{N='password';E={$SharedMailboxPassword}} |
+        Export-Csv -Delimiter ';' -Encoding UTF8 -NoTypeInformation -Path $cancomFile
+    Strip-Quotes $cancomFile
+    Write-Host "    └─ CANCOM CSV generated (email;password for Kopano reset)"
 }
 
 # === ROUTING FAILURES REPORT (USERS + SHARED MAILBOXES) ===
@@ -1454,8 +1486,20 @@ Write-Host "    - Nachzuegler_W1-9_Ready.csv" -NoNewline
 if ($nachzuegler.Count -gt 0) { 
     Write-Host " [$($nachzuegler.Count) users ready]" 
     Write-Host "    - Nachzuegler_Quick2_Batch.csv (email-only batch format)"
+    Write-Host "    - Nachzuegler_IMAP.csv (emailaddress,username,password)"
+    Write-Host "    - Nachzuegler_CANCOM.csv (email;password for Kopano reset)"
 } else { 
     Write-Host " (all up-to-date)" 
+}
+
+Write-Host "`n  Shared Mailbox Migration Files:"
+if ($nachzueglerShared.Count -gt 0) {
+    Write-Host "    - Nachzuegler_SharedMailboxes_W1-9_Ready.csv [$($nachzueglerShared.Count) shared ready]"
+    Write-Host "    - Nachzuegler_SharedMailboxes_Quick2_Batch.csv"
+    Write-Host "    - Nachzuegler_SharedMailboxes_IMAP.csv (using shared mailbox credentials)"
+    Write-Host "    - Nachzuegler_SharedMailboxes_CANCOM.csv (email;password for Kopano reset)"
+} else {
+    Write-Host "    (all up-to-date)"
 }
 Write-Host "`n  Status & Validation Reports:"
 Write-Host "    - Routing_Failures.csv" -NoNewline
