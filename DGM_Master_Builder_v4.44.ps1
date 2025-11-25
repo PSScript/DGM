@@ -30,10 +30,12 @@ $CancomPath          = Join-Path $SessionRoot "2025-11-17_benutzer_status_Cancom
 $SharedMailboxPath   = Join-Path $SessionRoot "2025-11-17_funktionspostfaecher_status_Cancom_semicolon.csv"
 $LizenzReportPath    = Join-Path $SessionRoot "Lizenzreport_ALL1.csv"
 $ChurchtoolsPath     = Join-Path $SessionRoot "churchtools_organizations.csv"
-$ElkwAdminsPath      = Join-Path $SessionRoot "elkwadmins-2025-09-15-krz.csv"
-$ElkwStatsPath       = Join-Path $SessionRoot "elkwstats-2025-09-15-krz.csv"
+#$ElkwAdminsPath      = Join-Path $SessionRoot "elkwadmins-2025-09-15-krz.csv"
+#$ElkwStatsPath       = Join-Path $SessionRoot "elkwstats-2025-09-15-krz.csv"
+$ElkwAdminsPath      = Join-Path $SessionRoot "elkwadmins-2025-11-15-krz.csv"
+$ElkwStatsPath       = Join-Path $SessionRoot "elkwstats-2025-11-15-krz.csv"
 $PasswordMasterPath  = "C:\temp\master_users_all_merged_MASTER_NEU2.csv"
-$Quick2InputPath     = Join-Path $SessionRoot "MigrationUsers_Quick2.csv"
+$Quick2InputPath     = Join-Path $SessionRoot "MigrationReport5.csv"
 
 # Shared Mailbox Default Password
 $SharedMailboxPassword = "tklT75Rc8bxEw4jhLf6A#"
